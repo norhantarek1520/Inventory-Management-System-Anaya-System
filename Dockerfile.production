@@ -1,0 +1,15 @@
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+
+COPY package*.json ./
+
+# Install only production dependencies to keep the image lightweight
+RUN npm ci --only=production
+
+# Copy the compiled JS files from the builder stage
+COPY --from=builder /app/dist ./dist
+
+EXPOSE 3000
+
+CMD ["node", "dist/main.js"]
