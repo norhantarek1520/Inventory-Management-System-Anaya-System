@@ -1,4 +1,5 @@
 # 🛒 Inventory Management System (IMS) — Anaya Market
+<img width="1380" height="662" alt="Anay log" src="https://github.com/user-attachments/assets/ab66dfb1-9d77-4fb0-876b-529164ca604e" />
 
 > **The Single Source of Truth for Enterprise Product Data, Multi-Branch Stock Visibility, Automated Procurement, and Logistics Reconciliation.**
 
