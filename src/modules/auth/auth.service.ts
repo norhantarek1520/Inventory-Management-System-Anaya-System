@@ -8,10 +8,7 @@ export class AuthService {
     // Admin-initiated user creation with employee code & temporary password generation
   }
 
-  public async sendOnboardingEmail(
-    user: any,
-    tempPassword: string,
-  ): Promise<void> {
+  public async sendOnboardingEmail(user: any, tempPassword: string): Promise<void> {
     // Send welcome email with login details and temp password
   }
 

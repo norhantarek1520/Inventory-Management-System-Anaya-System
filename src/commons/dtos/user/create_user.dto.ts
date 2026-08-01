@@ -10,7 +10,7 @@ import {
   MinLength,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { Role } from 'src/shared';
+import { Role } from 'src/commons';
 
 export class CreateUserDto {
   @ApiProperty({
@@ -43,8 +43,7 @@ export class CreateUserDto {
   username: string;
 
   @ApiProperty({
-    description:
-      'Unique email address for user login and onboarding communications',
+    description: 'Unique email address for user login and onboarding communications',
     example: 'nourhan@anayamarket.com',
   })
   @IsEmail()

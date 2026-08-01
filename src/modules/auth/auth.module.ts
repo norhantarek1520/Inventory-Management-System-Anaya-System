@@ -5,9 +5,7 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 
 @Module({
-  imports: [
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
-  ],
+  imports: [MongooseModule.forFeature([{ name: User.name, schema: UserSchema }])],
   controllers: [AuthController],
   providers: [AuthService],
 })
