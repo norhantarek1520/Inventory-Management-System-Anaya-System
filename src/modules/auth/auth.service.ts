@@ -1,17 +1,11 @@
 import { Injectable } from '@nestjs/common';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class AuthService {
+  constructor(private readonly userService: UserService) {}
+
   //================== 1. User Creation & Onboarding Flow ==========================================
-
-  public async createUser(dto: any): Promise<any> {
-    // Admin-initiated user creation with employee code & temporary password generation
-  }
-
-  public async sendOnboardingEmail(user: any, tempPassword: string): Promise<void> {
-    // Send welcome email with login details and temp password
-  }
-
   public async forcePasswordReset(userId: string, dto: any): Promise<any> {
     // Handle mandatory first-time password reset (flips isMustResetPassword to false)
   }
@@ -56,19 +50,5 @@ export class AuthService {
 
   public async resetPassword(dto: any): Promise<void> {
     // Verify single-use reset token and update password hash
-  }
-
-  // ========================================== 5. Private Helpers & Utilities ==========================================
-
-  private generateEmployeeCode() {
-    // Internal helper to generate EMP-xxxx codes
-  }
-
-  private generateTempPassword() {
-    // Internal helper to create secure temporary passwords
-  }
-
-  private async hashPassword(password: string) {
-    // Internal helper to hash passwords using bcrypt/argon2
   }
 }

@@ -1,15 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Patch,
-  Delete,
-  Query,
-  HttpCode,
-  HttpStatus,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, Delete, Query, HttpCode, HttpStatus } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto, GetUserQueryDto, UpdateUserDto } from 'src/commons/dtos';
 import { ParseObjectIdPipe } from 'node_modules/@nestjs/mongoose/dist';
@@ -24,8 +13,7 @@ export class UserController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Create a new user',
-    description:
-      'Registers a new user, generates a unique user code, and returns the created user without sensitive fields.',
+    description: 'Registers a new user, generates a unique user code, and returns the created user without sensitive fields.',
   })
   @ApiResponse({ status: 201, description: 'User successfully created.' })
   @ApiResponse({ status: 400, description: 'Validation error in request body.' })
@@ -39,8 +27,7 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Get all users',
-    description:
-      'Fetches paginated list of users with multi-field search and dynamic filtering capabilities.',
+    description: 'Fetches paginated list of users with multi-field search and dynamic filtering capabilities.',
   })
   @ApiResponse({
     status: 200,
@@ -55,8 +42,7 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Get user by ID',
-    description:
-      'Retrieves a single user record by its MongoDB ObjectId, excluding sensitive security credentials.',
+    description: 'Retrieves a single user record by its MongoDB ObjectId, excluding sensitive security credentials.',
   })
   @ApiParam({
     name: 'id',
@@ -75,8 +61,7 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Update user by ID',
-    description:
-      'Partially updates specific fields on an existing user account while ensuring unique constraints.',
+    description: 'Partially updates specific fields on an existing user account while ensuring unique constraints.',
   })
   @ApiParam({
     name: 'id',

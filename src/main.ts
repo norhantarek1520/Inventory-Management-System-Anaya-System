@@ -25,8 +25,6 @@ async function bootstrap() {
   //============================== Run the server ==========================================
   await app.listen(process.env.PORT ?? 3000);
   console.log(`🚀 Server is running on http://localhost:${process.env.PORT ?? 3000}`);
-  console.log(
-    `📚 Swagger documentation available at http://localhost:${process.env.PORT ?? 3000}/doc`,
-  );
+  console.log(`📚 Swagger documentation available at http://localhost:${process.env.PORT ?? 3000}/doc`);
 }
 bootstrap();

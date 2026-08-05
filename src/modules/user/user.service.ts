@@ -2,14 +2,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateUserDto, GetUserQueryDto, UpdateUserDto } from 'src/commons/dtos';
 import { User, UserDocument } from 'src/commons/schema/user.schema';
-import {
-  BadRequestException,
-  ConflictException,
-  HttpException,
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, ConflictException, HttpException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 
 import * as bcrypt from 'bcryptjs';
 @Injectable()
@@ -56,22 +49,14 @@ export class UserService {
 
       return userObject;
     } catch (error) {
-      throw new InternalServerErrorException(
-        'An error occurred while creating the user , The error is :',
-        error,
-      );
+      throw new InternalServerErrorException('An error occurred while creating the user , The error is :', error);
     }
   }
 
   /**
    * Fetch users with search, multi-field filtering, pagination, and total count.
    */
-  public async getAllUsers(queryDto?: GetUserQueryDto): Promise<{
-    users: Partial<User>[];
-    totalCount: number;
-    page: number;
-    totalPages: number;
-  }> {
+  public async getAllUsers(queryDto?: GetUserQueryDto): Promise<{ users: Partial<User>[]; totalCount: number; page: number; totalPages: number }> {
     try {
       const { page = 1, limit = 10 } = queryDto || {};
 
@@ -83,13 +68,7 @@ export class UserService {
 
       // 3. Execute count and find queries in parallel
       const [users, totalCount] = await Promise.all([
-        this.userModel
-          .find(filter)
-          .select('-password -refreshTokenHash -twoFactorSecret')
-          .sort({ createdAt: -1 })
-          .skip(skip)
-          .limit(limit)
-          .exec(),
+        this.userModel.find(filter).select('-password -refreshTokenHash -twoFactorSecret').sort({ createdAt: -1 }).skip(skip).limit(limit).exec(),
         this.userModel.countDocuments(filter).exec(),
       ]);
 
@@ -112,10 +91,7 @@ export class UserService {
    */
   public async getUserById(id: string): Promise<Partial<User>> {
     try {
-      const user = await this.userModel
-        .findById(id)
-        .select('-password -refreshTokenHash -twoFactorSecret')
-        .exec();
+      const user = await this.userModel.findById(id).select('-password -refreshTokenHash -twoFactorSecret').exec();
 
       if (!user) {
         throw new NotFoundException(`User with ID "${id}" not found`);
@@ -185,10 +161,7 @@ export class UserService {
       const result = await this.userModel.deleteMany({}).exec();
       return { deletedCount: result.deletedCount };
     } catch (error) {
-      throw new InternalServerErrorException(
-        'An error occurred while resetting the user database',
-        error,
-      );
+      throw new InternalServerErrorException('An error occurred while resetting the user database', error);
     }
   }
 
@@ -201,11 +174,7 @@ export class UserService {
   private async isUserExist(userData: CreateUserDto) {
     const existingUser = await this.userModel
       .findOne({
-        $or: [
-          { email: userData.email },
-          { username: userData.username },
-          { phone: userData.phone },
-        ],
+        $or: [{ email: userData.email }, { username: userData.username }, { phone: userData.phone }],
       })
       .exec();
 

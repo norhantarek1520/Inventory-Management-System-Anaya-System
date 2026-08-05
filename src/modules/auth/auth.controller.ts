@@ -7,11 +7,6 @@ export class AuthController {
 
   // ========================================== 1. User Creation & Onboarding Flow ==========================================
 
-  @Post('users')
-  public async createUser(@Body() dto: any) {
-    // POST /auth/users — Restrict to super_admin & admin via RolesGuard
-  }
-
   @Post('first-time-password-reset')
   public async forcePasswordReset(@Body() dto: any) {
     // POST /auth/first-time-password-reset

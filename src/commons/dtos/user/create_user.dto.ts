@@ -1,14 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsArray,
-  IsEmail,
-  IsEnum,
-  IsNotEmpty,
-  IsOptional,
-  IsPhoneNumber,
-  IsString,
-  MinLength,
-} from 'class-validator';
+import { IsArray, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsPhoneNumber, IsString, MinLength } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { Role } from 'src/commons';
 
@@ -71,8 +62,7 @@ export class CreateUserDto {
   role: Role;
 
   @ApiPropertyOptional({
-    description:
-      'Array of custom granular permission strings assigned to override/extend default role permissions',
+    description: 'Array of custom granular permission strings assigned to override/extend default role permissions',
     example: ['products:create', 'stock:adjust', 'reports:read'],
     type: [String],
     default: [],
