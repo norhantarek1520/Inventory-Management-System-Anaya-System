@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   HttpException,
   Injectable,
@@ -20,7 +21,7 @@ export class AuthService {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {}
 
-  //================== 1. User Register & Onboarding Flow ==========================================
+  //==================  User Register & Onboarding Flow ==========================================
 
   public async registerUser(registerDto: RegisterDto) {
     try {
@@ -60,27 +61,26 @@ export class AuthService {
 
   public async forcePasswordReset(userId: string, dto: ResetPasswordDto): Promise<{ message: string }> {
     try {
-      // 1. Hash the new password
+      // 1. Fetch the user to inspect status
+      const user = await this.userModel.findById(userId).exec();
+
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      // 2. Check if the user has already completed initial password reset
+      if (!user.isMustResetPassword) {
+        throw new BadRequestException('Initial password reset has already been completed for this account.');
+      }
+
+      // 3. Hash the new password
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(dto.password, saltRounds);
 
-      // 2. Update user document in database
-      const updatedUser = await this.userModel
-        .findByIdAndUpdate(
-          userId,
-          {
-            $set: {
-              password: hashedPassword,
-              isMustResetPassword: false,
-            },
-          },
-          { new: true, runValidators: true },
-        )
-        .exec();
-
-      if (!updatedUser) {
-        throw new NotFoundException(`User not found`);
-      }
+      // 4. Update password and flip the requirement flag
+      user.password = hashedPassword;
+      user.isMustResetPassword = false;
+      await user.save();
 
       return { message: 'Password reset successfully. You may now continue using your account.' };
     } catch (error) {
@@ -99,7 +99,7 @@ export class AuthService {
     // Confirm and activate 2FA for the user account
   }
 
-  // ========================================== 2. Core Authentication & Session Management ==========================================
+  // ==========================================  Core Authentication & Session Management ==========================================
 
   public async login(loginDto: LoginDto): Promise<{ message: string; accessToken: string; refreshToken: string }> {
     try {
@@ -197,13 +197,13 @@ export class AuthService {
     // Validate credentials, handle isMustResetPassword check, and 2FA state
   }
 
-  // ========================================== 3. Machine-to-Machine & System Service ==========================================
+  // ========================================== todo: Machine-to-Machine & System Service ==========================================
 
   public async validateSystemServiceAccount(apiKey: string): Promise<any> {
     // Validate API Key / Token for POS & E-COM integrations (system_service)
   }
 
-  // ========================================== 4. Password Recovery Lifecycle ==========================================
+  // ==========================================  Password Recovery Lifecycle ==========================================
 
   public async forgotPassword(dto: any): Promise<void> {
     // Generate time-limited reset token & send recovery email

@@ -30,7 +30,7 @@ export class UserController {
   //==================================================================================================
 
   @Get()
-  // @Roles(Role.ADMIN, Role.SUPER_ADMIN, Role.PROCUREMENT_MANAGER)
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN, Role.PROCUREMENT_MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Get all users',
@@ -47,7 +47,7 @@ export class UserController {
   //==================================================================================================
 
   @Get(':id')
-  // @Roles(Role.ADMIN, Role.SUPER_ADMIN, Role.PROCUREMENT_MANAGER)
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN, Role.PROCUREMENT_MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Get user by ID',
@@ -68,7 +68,7 @@ export class UserController {
   //==================================================================================================
 
   @Patch(':id')
-  // @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Update user by ID',
@@ -94,7 +94,7 @@ export class UserController {
   //==================================================================================================
 
   @Delete(':id')
-  // @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Delete user by ID',
@@ -116,7 +116,7 @@ export class UserController {
 
   //==================================================================================================
   @Delete('/reset/all')
-  // @Roles(Role.SUPER_ADMIN)
+  @Roles(Role.SUPER_ADMIN)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Reset user database',

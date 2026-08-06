@@ -7,6 +7,7 @@ import { DatabaseModule } from '../../database/database.module';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from 'src/commons';
 import { AuthModule } from '../auth/auth.module';
+import { SeedersModule } from '../../database/seeders/seeders.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { AuthModule } from '../auth/auth.module';
     DatabaseModule,
     UserModule,
     AuthModule,
+    SeedersModule, //it initializes on every boot.
   ],
   controllers: [AppController],
   providers: [
