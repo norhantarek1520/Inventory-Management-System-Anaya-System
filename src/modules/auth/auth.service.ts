@@ -1,8 +1,14 @@
-import { HttpException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  HttpException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UserService } from '../user/user.service';
-import { RegisterDto } from 'src/commons/dtos/auth';
+import { RegisterDto, ResetPasswordDto, LoginDto } from 'src/commons/dtos/auth';
 import * as bcrypt from 'bcryptjs';
-import { ResetPasswordDto } from 'src/commons/dtos/auth/reset_password.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from 'src/commons/schema/user.schema';
@@ -20,7 +26,12 @@ export class AuthService {
   public async registerUser(registerDto: RegisterDto) {
     try {
       // 1. Find user by email and username
-      const user = await this.userModel.findOne({ email: registerDto.email }).exec();
+      const user = await this.userModel
+        .findOne({
+          $or: [{ email: registerDto.email }, { username: registerDto.username }],
+        })
+        .exec();
+
       if (!user) {
         throw new Error('User with this email is not exists ');
       }
@@ -91,8 +102,48 @@ export class AuthService {
 
   // ========================================== 2. Core Authentication & Session Management ==========================================
 
-  public async login(user: any): Promise<any> {
-    // Primary login handler issuing Access and Refresh JWT tokens
+  public async login(loginDto: LoginDto): Promise<{ message: string; accessToken: string }> {
+    try {
+      // 1. Find user by email OR username OR userCode
+      const user = await this.userModel
+        .findOne({
+          $or: [{ email: loginDto.loginKey }, { username: loginDto.loginKey }, { userCode: loginDto.loginKey }],
+        })
+        .select('+password') // Ensures hidden password field is loaded
+        .exec();
+
+      if (!user) {
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      // 2. Compare plain-text password with stored hash
+      const isPasswordValid = await this.comparePassword(loginDto.password, user.password);
+      if (!isPasswordValid) {
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      // 3. Enforce password reset requirement
+      if (user.isMustResetPassword) {
+        throw new ForbiddenException({
+          statusCode: 403,
+          message: 'Password reset required before first login.',
+          isMustResetPassword: true,
+        });
+      }
+
+      // 4. Issue access token
+      const accessToken = await this.generateAccessToken(user);
+
+      return {
+        message: 'Login successful',
+        accessToken,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('An error occurred during login', error);
+    }
   }
 
   public async refreshTokens(refreshToken: string): Promise<any> {

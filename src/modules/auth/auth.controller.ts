@@ -1,9 +1,8 @@
 import { Controller, Get, Post, Body, Param, Patch, Delete, Query, HttpCode, HttpStatus, UseGuards, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { RegisterDto } from 'src/commons/dtos/auth';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
-import { ResetPasswordDto } from 'src/commons/dtos/auth/reset_password.dto';
 import { CurrentUser, JwtAuthGuard } from 'src/commons';
+import { RegisterDto, ResetPasswordDto, LoginDto } from 'src/commons/dtos/auth';
 
 @Controller('auth')
 export class AuthController {
@@ -55,10 +54,9 @@ export class AuthController {
   // ========================================== 2. Core Authentication & Session Management ==========================================
 
   @Post('login')
-  public async login(@Body() dto: any) {
+  public async login(@Body() loginDto: LoginDto) {
     console.log('✨ Starting user login process...');
-
-    // POST /auth/login
+    return this.authService.login(loginDto);
   }
   //=============================================================================================
 
