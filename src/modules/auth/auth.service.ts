@@ -6,8 +6,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { UserService } from '../user/user.service';
-import { RegisterDto, ResetPasswordDto, LoginDto } from 'src/commons/dtos/auth';
+import { RegisterDto, ResetPasswordDto, LoginDto, RefreshTokenDto } from 'src/commons/dtos/auth';
 import * as bcrypt from 'bcryptjs';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -102,7 +101,7 @@ export class AuthService {
 
   // ========================================== 2. Core Authentication & Session Management ==========================================
 
-  public async login(loginDto: LoginDto): Promise<{ message: string; accessToken: string }> {
+  public async login(loginDto: LoginDto): Promise<{ message: string; accessToken: string; refreshToken: string }> {
     try {
       // 1. Find user by email OR username OR userCode
       const user = await this.userModel
@@ -132,11 +131,12 @@ export class AuthService {
       }
 
       // 4. Issue access token
-      const accessToken = await this.generateAccessToken(user);
+      const { accessToken, refreshToken } = await this.generateTokens(user);
 
       return {
         message: 'Login successful',
         accessToken,
+        refreshToken,
       };
     } catch (error) {
       if (error instanceof HttpException) {
@@ -146,12 +146,52 @@ export class AuthService {
     }
   }
 
-  public async refreshTokens(refreshToken: string): Promise<any> {
-    // Refresh token rotation mechanism
+  /**
+   * Validates Refresh Token and issues a new pair (Token Rotation).
+   */
+  public async refreshTokens(dto: RefreshTokenDto): Promise<{ accessToken: string; refreshToken: string }> {
+    try {
+      // 1. Verify token signature and expiration
+      const payload = await this.jwtService.verifyAsync(dto.refreshToken, {
+        secret: process.env.JWT_REFRESH_SECRET || 'superSecretRefreshKey',
+      });
+      console.log('Refresh token payload:', payload);
+
+      // 2. Fetch user with stored hashed refresh token
+      const user = await this.userModel.findById(payload.sub).select('+refreshTokenHash').exec();
+      if (!user || !user.refreshTokenHash) {
+        throw new UnauthorizedException('Access denied. Token is invalid or session expired.');
+      }
+
+      // 3. Compare incoming refresh token with database hash
+      const isRefreshTokenValid = await bcrypt.compare(dto.refreshToken, user.refreshTokenHash);
+      if (!isRefreshTokenValid) {
+        throw new UnauthorizedException('Invalid refresh token.');
+      }
+
+      // 4. Generate new token pair (Token Rotation)
+      return await this.generateTokens(user);
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new UnauthorizedException('Invalid or expired refresh token.');
+    }
   }
 
-  public async logout(userId: string, refreshToken: string): Promise<void> {
-    // Invalidate active session/refresh tokens
+  /**
+   * Removes stored Refresh Token from database to invalidate session.
+   */
+  public async logout(userId: string): Promise<{ message: string }> {
+    try {
+      await this.userModel.findByIdAndUpdate(userId, {
+        $set: { refreshTokenHash: null },
+      });
+
+      return { message: 'Logged out successfully.' };
+    } catch (error) {
+      throw new InternalServerErrorException('An error occurred during logout.');
+    }
   }
   public async validateUserCredentials(dto: any): Promise<any> {
     // Validate credentials, handle isMustResetPassword check, and 2FA state
@@ -184,6 +224,35 @@ export class AuthService {
     };
 
     return this.jwtService.sign(payload);
+  }
+  /**
+   * Generates both Access and Refresh tokens, then saves the hashed Refresh Token to DB.
+   */
+  public async generateTokens(user: any): Promise<{ accessToken: string; refreshToken: string }> {
+    const payload = {
+      sub: user._id || user.id,
+      email: user.email,
+      username: user.username,
+      role: user.role,
+    };
+
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(payload, {
+        secret: process.env.JWT_SECRET || 'superSecretKey',
+        expiresIn: '1h', // Short-lived access token
+      }),
+      this.jwtService.signAsync(payload, {
+        secret: process.env.JWT_REFRESH_SECRET || 'superSecretRefreshKey',
+        expiresIn: '7d', // Long-lived refresh token
+      }),
+    ]);
+    // Store hashed refresh token in database for security
+    const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+    await this.userModel.findByIdAndUpdate(user._id || user.id, {
+      $set: { refreshTokenHash: hashedRefreshToken },
+    });
+
+    return { accessToken, refreshToken };
   }
   /**
    * Compares plain-text password with stored bcrypt hash

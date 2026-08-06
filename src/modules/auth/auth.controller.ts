@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Param, Patch, Delete, Query, HttpCode, Htt
 import { AuthService } from './auth.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { CurrentUser, JwtAuthGuard } from 'src/commons';
-import { RegisterDto, ResetPasswordDto, LoginDto } from 'src/commons/dtos/auth';
+import { RegisterDto, ResetPasswordDto, LoginDto, RefreshTokenDto } from 'src/commons/dtos/auth';
 
 @Controller('auth')
 export class AuthController {
@@ -60,21 +60,24 @@ export class AuthController {
   }
   //=============================================================================================
 
-  @Post('refresh')
-  @UseGuards(JwtAuthGuard)
-  public async refreshTokens(@Req() req: any) {
-    console.log('✨ Starting user refresh token process...');
-
-    // POST /auth/refresh
+  @Post('refresh-token')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Refresh access token using refresh token' })
+  @ApiResponse({ status: 200, description: 'Tokens refreshed successfully.' })
+  @ApiResponse({ status: 401, description: 'Invalid or expired refresh token.' })
+  public async refreshTokens(@Body() dto: RefreshTokenDto) {
+    return this.authService.refreshTokens(dto);
   }
   //=============================================================================================
 
   @Post('logout')
   @UseGuards(JwtAuthGuard)
-  public async logout(@Req() req: any) {
-    console.log('✨ Starting user logout process...');
-
-    // POST /auth/logout
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Logout current user and invalidate refresh token' })
+  @ApiResponse({ status: 200, description: 'Logged out successfully.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  public async logout(@CurrentUser('userId') userId: string) {
+    return this.authService.logout(userId);
   }
 
   // ========================================== 3. Password Recovery Lifecycle ==========================================
