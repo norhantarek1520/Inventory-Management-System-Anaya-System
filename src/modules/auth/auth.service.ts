@@ -13,6 +13,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from 'src/commons/schema/user.schema';
 import { JwtService } from '@nestjs/jwt';
+import { getEffectivePermissions } from 'src/commons/constants';
 
 @Injectable()
 export class AuthService {
@@ -220,6 +221,7 @@ export class AuthService {
       username: user.username,
       userCode: user.userCode,
       role: user.role,
+      permissions: getEffectivePermissions(user.role, user.permissions),
       isMustResetPassword: user.isMustResetPassword,
     };
 
@@ -234,6 +236,10 @@ export class AuthService {
       email: user.email,
       username: user.username,
       role: user.role,
+      // Effective permissions = role's defaults ∪ this user's individually granted extras.
+      // Recomputed from the DB user on every login/refresh, so permission grants apply
+      // as soon as the user gets a fresh token (no need to touch existing tokens).
+      permissions: getEffectivePermissions(user.role, user.permissions),
     };
 
     const [accessToken, refreshToken] = await Promise.all([

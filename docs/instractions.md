@@ -84,5 +84,29 @@ Add clear description, realistic example, and class-validator annotations to eve
 "Format the code using single-line section headers (// ========================================== N. Title ==========================================), explicit public keywords for public methods placed above, and a dedicated private helper section at the bottom. Ensure every file starts with a description header comment, includes step-by-step numbered comments with logging, and all DTOs are decorated with Swagger metadata (@ApiProperty)."
 
 ```
+               ┌───────────────────────────┐
+               │    Incoming Request       │
+               └─────────────┬─────────────┘
+                             │
+                     [ JwtAuthGuard ] ──► Token Valid? ──► (No: 401 Unauthorized)
+                             │
+                             ▼
+                     [ RolesGuard ]   ──► Role Allowed? ──► (No: 403 Forbidden)
+                             │
+                             ▼
+                  [ PermissionsGuard ]
+                             │
+     ┌───────────────────────┼────────────────────────┐
+     │                       │                        │
+(Is super_admin?)  (Has Required Role?)  (Has Explicit Custom Permission?)
+     │                       │                        │
+     ▼                       ▼                        ▼
+  ALLOW                   ALLOW                    ALLOW
 
 ```
+
+super_admin Bypass: If the user is a super_admin, they automatically bypass restriction checks.
+
+Role Check: Does the user's role match one of the required roles for this route?
+
+Extra Permission Check: If their role alone doesn't grant access, does their custom permissions array include the needed permission key?

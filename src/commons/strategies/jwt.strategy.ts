@@ -22,6 +22,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   //       throw new UnauthorizedException('Token user no longer exists');
   //     }
   async validate(payload: any) {
-    return { userId: payload.sub, email: payload.email, role: payload.role };
+    return { userId: payload.sub, email: payload.email, role: payload.role, permissions: payload.permissions || [] };
   }
 }

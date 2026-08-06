@@ -1,7 +1,7 @@
-import { Controller, Get, Post, Body, Param, Patch, Delete, Query, HttpCode, HttpStatus, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, Delete, Query, HttpCode, HttpStatus, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
-import { CurrentUser, JwtAuthGuard } from 'src/commons';
+import { CurrentUser, Public } from 'src/commons';
 import { RegisterDto, ResetPasswordDto, LoginDto, RefreshTokenDto } from 'src/commons/dtos/auth';
 
 @Controller('auth')
@@ -11,6 +11,7 @@ export class AuthController {
   // ========================================== 1. User Register & Onboarding Flow ==========================================
 
   @Post('register')
+  @Public()
   public async registerUser(@Body() registerDto: RegisterDto) {
     console.log('✨ Starting user registration process...');
     return this.authService.registerUser(registerDto);
@@ -19,7 +20,6 @@ export class AuthController {
   //=============================================================================================
 
   @Post('first-time-password-reset')
-  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Force password reset',
@@ -35,7 +35,6 @@ export class AuthController {
   //=============================================================================================
 
   @Post('2fa/setup')
-  @UseGuards(JwtAuthGuard)
   public async setup2FA(@Req() req: any) {
     console.log('✨ Starting setup 2FA process...');
 
@@ -44,7 +43,6 @@ export class AuthController {
   //=============================================================================================
 
   @Post('2fa/verify')
-  @UseGuards(JwtAuthGuard)
   public async verify2FASetup(@Req() req: any, @Body() dto: any) {
     console.log('✨ Starting verify 2FA setup process...');
 
@@ -54,6 +52,7 @@ export class AuthController {
   // ========================================== 2. Core Authentication & Session Management ==========================================
 
   @Post('login')
+  @Public()
   public async login(@Body() loginDto: LoginDto) {
     console.log('✨ Starting user login process...');
     return this.authService.login(loginDto);
@@ -61,6 +60,7 @@ export class AuthController {
   //=============================================================================================
 
   @Post('refresh-token')
+  @Public()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Refresh access token using refresh token' })
   @ApiResponse({ status: 200, description: 'Tokens refreshed successfully.' })
@@ -71,7 +71,6 @@ export class AuthController {
   //=============================================================================================
 
   @Post('logout')
-  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Logout current user and invalidate refresh token' })
   @ApiResponse({ status: 200, description: 'Logged out successfully.' })
@@ -83,6 +82,7 @@ export class AuthController {
   // ========================================== 3. Password Recovery Lifecycle ==========================================
 
   @Post('forgot-password')
+  @Public()
   public async forgotPassword(@Body() dto: any) {
     console.log('✨ Starting user forget password process...');
 
@@ -91,6 +91,7 @@ export class AuthController {
   //=============================================================================================
 
   @Post('reset-password')
+  @Public()
   public async resetPassword(@Body() dto: any) {
     console.log('✨ Starting user reset password process...');
 

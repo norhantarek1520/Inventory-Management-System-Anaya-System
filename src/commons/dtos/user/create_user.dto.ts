@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsArray, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsPhoneNumber, IsString, MinLength } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { Role } from 'src/commons';
+import { Permission, Role } from 'src/commons';
 
 export class CreateUserDto {
   @ApiProperty({
@@ -62,13 +62,15 @@ export class CreateUserDto {
   role: Role;
 
   @ApiPropertyOptional({
-    description: 'Array of custom granular permission strings assigned to override/extend default role permissions',
-    example: ['products:create', 'stock:adjust', 'reports:read'],
-    type: [String],
+    description:
+      'Extra granular permissions to grant this user on top of their role\'s defaults (e.g. give an inventory_staff user "products:create" even though their role would not normally include it).',
+    enum: Permission,
+    isArray: true,
+    example: [Permission.PRODUCTS_CREATE, Permission.STOCK_ADJUST],
     default: [],
   })
   @IsArray()
-  @IsString({ each: true })
+  @IsEnum(Permission, { each: true, message: `each permission must be one of: ${Object.values(Permission).join(', ')}` })
   @IsOptional()
-  permissions?: string[];
+  permissions?: Permission[];
 }

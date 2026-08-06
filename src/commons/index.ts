@@ -4,4 +4,5 @@ export * from './decorators';
 export * from './schema';
 export * from './guards';
 export * from './strategies';
+export * from './constants';
 // export * from './interfaces';

@@ -3,8 +3,7 @@ import { UserService } from './user.service';
 import { CreateUserDto, GetUserQueryDto, UpdateUserDto } from 'src/commons/dtos';
 import { ParseObjectIdPipe } from 'node_modules/@nestjs/mongoose/dist';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
-import { Role, Roles, RolesGuard } from 'src/commons';
-import { JwtAuthGuard } from 'src/commons';
+import { Role, Roles, Permissions, Permission } from 'src/commons';
 
 @ApiTags('Users')
 @Controller('user')
@@ -14,7 +13,7 @@ export class UserController {
   //==================================================================================================
 
   @Post()
-  // @Roles(Role.ADMIN)
+  @Permissions(Permission.USERS_CREATE)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Create a new user',
@@ -30,7 +29,7 @@ export class UserController {
   //==================================================================================================
 
   @Get()
-  @Roles(Role.ADMIN, Role.SUPER_ADMIN, Role.PROCUREMENT_MANAGER)
+  @Permissions(Permission.USERS_READ)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Get all users',
@@ -47,7 +46,7 @@ export class UserController {
   //==================================================================================================
 
   @Get(':id')
-  @Roles(Role.ADMIN, Role.SUPER_ADMIN, Role.PROCUREMENT_MANAGER)
+  @Permissions(Permission.USERS_READ)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Get user by ID',
@@ -68,7 +67,7 @@ export class UserController {
   //==================================================================================================
 
   @Patch(':id')
-  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+  @Permissions(Permission.USERS_UPDATE)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Update user by ID',
@@ -94,7 +93,7 @@ export class UserController {
   //==================================================================================================
 
   @Delete(':id')
-  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+  @Permissions(Permission.USERS_DELETE)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Delete user by ID',
