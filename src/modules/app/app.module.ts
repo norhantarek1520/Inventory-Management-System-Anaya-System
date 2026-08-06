@@ -4,8 +4,9 @@ import { AppService } from './app.service';
 import { UserModule } from '../user/user.module';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from '../../database/database.module';
-import { APP_GUARD } from 'node_modules/@nestjs/core';
+import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from 'src/commons';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { RolesGuard } from 'src/commons';
     }),
     DatabaseModule,
     UserModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [

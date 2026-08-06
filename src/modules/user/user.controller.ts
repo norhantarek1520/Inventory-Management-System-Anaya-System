@@ -4,16 +4,17 @@ import { CreateUserDto, GetUserQueryDto, UpdateUserDto } from 'src/commons/dtos'
 import { ParseObjectIdPipe } from 'node_modules/@nestjs/mongoose/dist';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { Role, Roles, RolesGuard } from 'src/commons';
+import { JwtAuthGuard } from 'src/commons';
 
 @ApiTags('Users')
 @Controller('user')
-@UseGuards(RolesGuard) // 👈 Order matters auth guard should run first
+//@UseGuards(RolesGuard) // 👈 Order matters auth guard should run first
 export class UserController {
   constructor(private readonly userService: UserService) {}
   //==================================================================================================
 
   @Post()
-  @Roles(Role.ADMIN)
+  // @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Create a new user',
@@ -29,7 +30,7 @@ export class UserController {
   //==================================================================================================
 
   @Get()
-  @Roles(Role.ADMIN, Role.SUPER_ADMIN, Role.PROCUREMENT_MANAGER)
+  // @Roles(Role.ADMIN, Role.SUPER_ADMIN, Role.PROCUREMENT_MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Get all users',
@@ -46,7 +47,7 @@ export class UserController {
   //==================================================================================================
 
   @Get(':id')
-  @Roles(Role.ADMIN, Role.SUPER_ADMIN, Role.PROCUREMENT_MANAGER)
+  // @Roles(Role.ADMIN, Role.SUPER_ADMIN, Role.PROCUREMENT_MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Get user by ID',
@@ -67,7 +68,7 @@ export class UserController {
   //==================================================================================================
 
   @Patch(':id')
-  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+  // @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Update user by ID',
@@ -93,7 +94,7 @@ export class UserController {
   //==================================================================================================
 
   @Delete(':id')
-  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+  // @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Delete user by ID',
@@ -115,7 +116,7 @@ export class UserController {
 
   //==================================================================================================
   @Delete('/reset/all')
-  @Roles(Role.SUPER_ADMIN)
+  // @Roles(Role.SUPER_ADMIN)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Reset user database',

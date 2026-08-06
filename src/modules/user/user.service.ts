@@ -1,7 +1,7 @@
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { CreateUserDto, GetUserQueryDto, UpdateUserDto } from 'src/commons/dtos';
 import { User, UserDocument } from 'src/commons/schema/user.schema';
+import { CreateUserDto, GetUserQueryDto, UpdateUserDto } from 'src/commons/dtos';
 import { BadRequestException, ConflictException, HttpException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 
 import * as bcrypt from 'bcryptjs';
@@ -12,7 +12,7 @@ export class UserService {
   /**
    * Creates a new user record in the database
    */
-  public async createUser(createUserDto: CreateUserDto): Promise<Partial<User>> {
+  public async createUser(createUserDto: CreateUserDto): Promise<{ userObject: Partial<User>; tempPassword: string }> {
     console.log('⚡Creating user ');
     // 1. Check for unique constraints beforehand (Email & Username)
     await this.isUserExist(createUserDto);
@@ -47,7 +47,7 @@ export class UserService {
       delete userObject.refreshTokenHash;
       delete userObject.twoFactorSecret;
 
-      return userObject;
+      return { userObject, tempPassword }; // Return temp password for testing purposes (remove in production)
     } catch (error) {
       throw new InternalServerErrorException('An error occurred while creating the user , The error is :', error);
     }
@@ -165,6 +165,10 @@ export class UserService {
     }
   }
 
+  //============================================ public Helper funcions ==========================================
+  public async getUserByEmail(email: string): Promise<UserDocument | null> {
+    return this.userModel.findOne({ email }).exec();
+  }
   // ========================================== Private Helpers & Utilities ==========================================
 
   /**
