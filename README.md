@@ -37,6 +37,33 @@ IMS implements a fine-grained Role-Based Access Control (RBAC) architecture with
 |  📦  | **`inventory_staff`**     | On-ground Goods Received Note (GRN) entry, physical stock counts, expiry checks, and shrinkage logging. | Warehouse Staff / Store Clerk       |
 |  🤖  | **`system_service`**      | Non-human machine-to-machine API key authentication for POS and E-Commerce synchronization.             | Automated POS & E-COM Microservices |
 
+## 🛡️ Authentication & Access Control Architecture
+
+The system utilizes a hybrid **Role-Based Access Control (RBAC) & Dynamic Permission Override System** implemented using NestJS Guards and Decorators:
+
+```text
+                            ┌───────────────────────────┐
+                            │    Incoming Request       │
+                            └─────────────┬─────────────┘
+                                          │
+                                   [ JwtAuthGuard ] ──► Token Valid? ──► (No: 401 Unauthorized)
+                                          │
+                                          ▼
+                                   [ RolesGuard ]   ──► Role Allowed? ──► (No: 403 Forbidden)
+                                          │
+                                          ▼
+                                   [ PermissionsGuard ]
+                                          │
+                  ┌───────────────────────┼────────────────────────┐
+                  │                       │                        │
+            (Is super_admin?)  (Has Required Role?)  (Has Explicit Custom Permission?)
+                  │                       │                        │
+                  ▼                       ▼                        ▼
+            ALLOW                  ALLOW                    ALLOW
+
+
+```
+
 ## 🏗️ Architecture & Directory Blueprint
 
 The project is built with NestJS, adhering to a clean domain-driven layout:
