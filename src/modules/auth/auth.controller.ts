@@ -3,7 +3,7 @@ import { AuthService } from './auth.service';
 import { RegisterDto } from 'src/commons/dtos/auth';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { ResetPasswordDto } from 'src/commons/dtos/auth/reset_password.dto';
-import { JwtAuthGuard } from 'src/commons';
+import { CurrentUser, JwtAuthGuard } from 'src/commons';
 
 @Controller('auth')
 export class AuthController {
@@ -28,10 +28,10 @@ export class AuthController {
   })
   @ApiResponse({ status: 200, description: 'Password reset successfully.' })
   @ApiResponse({ status: 400, description: 'Validation failed or passwords do not match.' })
-  public async forcePasswordReset(@Body() dto: ResetPasswordDto) {
+  public async forcePasswordReset(@CurrentUser('userId') userId: string, @Body() dto: ResetPasswordDto) {
     console.log('✨ Starting force password reset process...');
     // todo: extract actual userId from JWT payload via request context / decorator
-    return this.authService.forcePasswordReset('id', dto);
+    return this.authService.forcePasswordReset(userId, dto);
   }
   //=============================================================================================
 
