@@ -22,9 +22,9 @@ export class UserController {
   @ApiResponse({ status: 201, description: 'User successfully created.' })
   @ApiResponse({ status: 400, description: 'Validation error in request body.' })
   @ApiResponse({ status: 409, description: 'Username, email, or phone number already in use.' })
-  createUser(@Body() user: CreateUserDto) {
+  createUser(@Body() dto: CreateUserDto) {
     console.log('✨Received request to create user');
-    return this.userService.createUser(user);
+    return this.userService.createUser(dto);
   }
   //==================================================================================================
 
@@ -39,9 +39,9 @@ export class UserController {
     status: 200,
     description: 'Successfully retrieved list of users and pagination metrics.',
   })
-  getAllUsers(@Query() getUserQueryDto?: GetUserQueryDto) {
+  getAllUsers(@Query() dto?: GetUserQueryDto) {
     console.log('✨Fetching all users from controller...');
-    return this.userService.getAllUsers(getUserQueryDto);
+    return this.userService.getAllUsers(dto);
   }
   //==================================================================================================
 
@@ -85,10 +85,10 @@ export class UserController {
     status: 409,
     description: 'Updated email or phone is already taken by another user.',
   })
-  updateUser(@Param('id', ParseObjectIdPipe) id: string, @Body() updateUserDto: UpdateUserDto) {
+  updateUser(@Param('id', ParseObjectIdPipe) id: string, @Body() dto: UpdateUserDto) {
     console.log('Update one user from controller...');
 
-    return this.userService.updateUser(id, updateUserDto);
+    return this.userService.updateUser(id, dto);
   }
   //==================================================================================================
 

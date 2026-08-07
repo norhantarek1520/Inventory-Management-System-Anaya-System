@@ -77,6 +77,8 @@ Every DTO field must include @ApiProperty or @ApiPropertyOptional.
 
 Add clear description, realistic example, and class-validator annotations to every property.
 
+in contorller , we unifiy any varibale use dto as dto , but in service ,we use the same dto name but with first letter is small not capital
+
 #
 
 ## 🤖 Prompt Snippet for AI Code Generation

@@ -53,6 +53,12 @@ export class User {
 
   @Prop({ type: String, select: false })
   refreshTokenHash?: string; // Hashed refresh token for active session verification
+
+  @Prop({ type: Number })
+  passwordResetCode?: number; // Token for password reset requests
+
+  @Prop({ type: Date })
+  passwordResetCodeExpiry?: Date; // Expiry timestamp for the reset token
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

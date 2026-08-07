@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Param, Patch, Delete, Query, HttpCode, Htt
 import { AuthService } from './auth.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { CurrentUser, Public } from 'src/commons';
-import { RegisterDto, ResetPasswordDto, LoginDto, RefreshTokenDto } from 'src/commons/dtos/auth';
+import { RegisterDto, LoginDto, RefreshTokenDto, ForgetPasswordDto, ResetPasswordDto, ForceResetPasswordDto } from 'src/commons/dtos/auth';
 
 @Controller('auth')
 export class AuthController {
@@ -12,9 +12,9 @@ export class AuthController {
 
   @Post('register')
   @Public()
-  public async registerUser(@Body() registerDto: RegisterDto) {
+  public async registerUser(@Body() dto: RegisterDto) {
     console.log('✨ Starting user registration process...');
-    return this.authService.registerUser(registerDto);
+    return this.authService.registerUser(dto);
   }
 
   //=============================================================================================
@@ -27,9 +27,8 @@ export class AuthController {
   })
   @ApiResponse({ status: 200, description: 'Password reset successfully.' })
   @ApiResponse({ status: 400, description: 'Validation failed or passwords do not match.' })
-  public async forcePasswordReset(@CurrentUser('userId') userId: string, @Body() dto: ResetPasswordDto) {
+  public async forcePasswordReset(@CurrentUser('userId') userId: string, @Body() dto: ForceResetPasswordDto) {
     console.log('✨ Starting force password reset process...');
-    // todo: extract actual userId from JWT payload via request context / decorator
     return this.authService.forcePasswordReset(userId, dto);
   }
   //=============================================================================================
@@ -53,9 +52,9 @@ export class AuthController {
 
   @Post('login')
   @Public()
-  public async login(@Body() loginDto: LoginDto) {
+  public async login(@Body() dto: LoginDto) {
     console.log('✨ Starting user login process...');
-    return this.authService.login(loginDto);
+    return this.authService.login(dto);
   }
   //=============================================================================================
 
@@ -83,19 +82,17 @@ export class AuthController {
 
   @Post('forgot-password')
   @Public()
-  public async forgotPassword(@Body() dto: any) {
+  public async forgotPassword(@Body() dto: ForgetPasswordDto) {
     console.log('✨ Starting user forget password process...');
-
-    // POST /auth/forgot-password
+    return this.authService.forgotPassword(dto);
   }
   //=============================================================================================
 
   @Post('reset-password')
   @Public()
-  public async resetPassword(@Body() dto: any) {
+  public async resetPassword(@Body() dto: ResetPasswordDto) {
     console.log('✨ Starting user reset password process...');
-
-    // POST /auth/reset-password
+    return this.authService.resetPassword(dto);
   }
   //=============================================================================================
 }

@@ -7,7 +7,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { RegisterDto, ResetPasswordDto, LoginDto, RefreshTokenDto } from 'src/commons/dtos/auth';
+import { RegisterDto, LoginDto, RefreshTokenDto, ForgetPasswordDto, ForceResetPasswordDto, ResetPasswordDto } from 'src/commons/dtos/auth';
 import * as bcrypt from 'bcryptjs';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -60,7 +60,7 @@ export class AuthService {
     }
   }
 
-  public async forcePasswordReset(userId: string, dto: ResetPasswordDto): Promise<{ message: string }> {
+  public async forcePasswordReset(userId: string, forceResetPasswordDto: ForceResetPasswordDto): Promise<{ message: string }> {
     try {
       // 1. Fetch the user to inspect status
       const user = await this.userModel.findById(userId).exec();
@@ -76,7 +76,7 @@ export class AuthService {
 
       // 3. Hash the new password
       const saltRounds = 10;
-      const hashedPassword = await bcrypt.hash(dto.password, saltRounds);
+      const hashedPassword = await bcrypt.hash(forceResetPasswordDto.password, saltRounds);
 
       // 4. Update password and flip the requirement flag
       user.password = hashedPassword;
@@ -150,10 +150,10 @@ export class AuthService {
   /**
    * Validates Refresh Token and issues a new pair (Token Rotation).
    */
-  public async refreshTokens(dto: RefreshTokenDto): Promise<{ accessToken: string; refreshToken: string }> {
+  public async refreshTokens(refreshTokenDto: RefreshTokenDto): Promise<{ accessToken: string; refreshToken: string }> {
     try {
       // 1. Verify token signature and expiration
-      const payload = await this.jwtService.verifyAsync(dto.refreshToken, {
+      const payload = await this.jwtService.verifyAsync(refreshTokenDto.refreshToken, {
         secret: process.env.JWT_REFRESH_SECRET || 'superSecretRefreshKey',
       });
       console.log('Refresh token payload:', payload);
@@ -165,7 +165,7 @@ export class AuthService {
       }
 
       // 3. Compare incoming refresh token with database hash
-      const isRefreshTokenValid = await bcrypt.compare(dto.refreshToken, user.refreshTokenHash);
+      const isRefreshTokenValid = await bcrypt.compare(refreshTokenDto.refreshToken, user.refreshTokenHash);
       if (!isRefreshTokenValid) {
         throw new UnauthorizedException('Invalid refresh token.');
       }
@@ -206,12 +206,42 @@ export class AuthService {
 
   // ==========================================  Password Recovery Lifecycle ==========================================
 
-  public async forgotPassword(dto: any): Promise<void> {
-    // Generate time-limited reset token & send recovery email
+  public async forgotPassword(forgetPasswordDto: ForgetPasswordDto): Promise<void> {
+    // Find user by email
+    const user = await this.userModel.findOne({ email: forgetPasswordDto.email }).exec();
+    if (!user) {
+      throw new NotFoundException('User with this email does not exist');
+    }
+    // Generate time-limited reset token and save it to db
+    const { resetCode, expiresAt } = this.generatePasswordResetToken(1);
+    user.passwordResetCode = resetCode;
+    user.passwordResetCodeExpiry = expiresAt;
+    await user.save();
+
+    //  send recovery email
+    //await this.mailService.sendPasswordResetEmail(user, resetCode);
   }
 
-  public async resetPassword(dto: any): Promise<void> {
+  public async resetPassword(resetPasswordDto: ResetPasswordDto): Promise<void> {
     // Verify single-use reset token and update password hash
+    const user = await this.userModel
+      .findOne({
+        passwordResetCode: resetPasswordDto.resetCode,
+        passwordResetCodeExpiry: { $gt: new Date() },
+      })
+      .exec();
+    if (!user) {
+      throw new NotFoundException('Invalid or expired reset code');
+    }
+
+    if (user.passwordResetCodeExpiry < new Date()) {
+      throw new BadRequestException('Verification code has expired.');
+    }
+    // Update password hash
+    user.password = await bcrypt.hash(resetPasswordDto.newPassword, 10);
+    user.passwordResetCode = undefined;
+    user.passwordResetCodeExpiry = undefined;
+    await user.save();
   }
   //=============================================== Private helper funcions =========================================
   public async generateAccessToken(user: any) {
@@ -265,5 +295,19 @@ export class AuthService {
    */
   private async comparePassword(plainText: string, hash: string): Promise<boolean> {
     return bcrypt.compare(plainText, hash);
+  }
+
+  /**
+   * Generates a cryptographically secure random token,
+   * hashes it for database storage, and calculates expiration.
+   * * @param expirationInMinutes - Expiration period (default: 15 mins)
+   */
+  private generatePasswordResetToken(expirationInMinutes = 15): { resetCode: number; expiresAt: Date } {
+    // 1. Generate a random code
+    const resetCode = Math.floor(10000 + Math.random() * 90000);
+    // 3. Set expiration timestamp
+    const expiresAt = new Date(Date.now() + expirationInMinutes * 60 * 1000);
+
+    return { resetCode, expiresAt };
   }
 }
