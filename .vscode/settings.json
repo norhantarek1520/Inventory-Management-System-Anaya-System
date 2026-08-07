@@ -1,0 +1,94 @@
+{
+  "todohighlight.isEnable": true,
+  "todohighlight.isCaseSensitive": false,
+  "todohighlight.keywordsPattern": "todo:|error:|done:|bug:",
+  "todohighlight.defaultStyle": {
+    "isWholeLine": false
+  },
+  "todohighlight.keywords": [
+    {
+      "text": "todo:",
+      "color": "#000000",
+      "backgroundColor": "#FFCC00",
+      "overviewRulerColor": "#FFCC00"
+    },
+    {
+      "text": "bug:",
+      "color": "#000000",
+      "backgroundColor": "#FFCC00",
+      "overviewRulerColor": "#FFCC00"
+    },
+    {
+      "text": "error:",
+      "color": "#FFFFFF",
+      "backgroundColor": "#DC3545",
+      "overviewRulerColor": "#DC3545"
+    },
+    {
+      "text": "done:",
+      "color": "#FFFFFF",
+      "backgroundColor": "#28A745",
+      "overviewRulerColor": "#28A745"
+    }
+  ],
+  "todohighlight.include": ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx", "**/*.html", "**/*.php", "**/*.css", "**/*.scss"],
+  "todohighlight.exclude": [
+    "**/node_modules/**",
+    "**/bower_components/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.vscode/**",
+    "**/.github/**",
+    "**/_output/**",
+    "**/*.min.*",
+    "**/*.map",
+    "**/.next/**"
+  ],
+  "todohighlight.maxFilesForSearch": 5120,
+  "todohighlight.toggleURI": false,
+
+  "todo-tree.highlights.enabled": true,
+  "todo-tree.general.tags": ["todo:", "TODO:", "done:", "DONE:", "NOTE:", "FIXME:"],
+  "todo-tree.filtering.ignoreCase": true,
+  "todo-tree.highlights.defaultHighlight": {
+    "type": "tag"
+  },
+  "todo-tree.highlights.customHighlight": {
+    "todo:": {
+      "icon": "tools",
+      "foreground": "#000000",
+      "background": "#FFCC00",
+      "iconColour": "#FFCC00"
+    },
+    "TODO:": {
+      "icon": "tools",
+      "foreground": "#000000",
+      "background": "#FFCC00",
+      "iconColour": "#FFCC00"
+    },
+    "done:": {
+      "icon": "check",
+      "foreground": "#FFFFFF",
+      "background": "#28A745",
+      "iconColour": "#28A745"
+    },
+    "DONE:": {
+      "icon": "check",
+      "foreground": "#FFFFFF",
+      "background": "#28A745",
+      "iconColour": "#28A745"
+    },
+    "NOTE:": {
+      "icon": "note",
+      "foreground": "#000000",
+      "background": "#17A2B8",
+      "iconColour": "#17A2B8"
+    },
+    "FIXME:": {
+      "icon": "flame",
+      "foreground": "#FFFFFF",
+      "background": "#DC3545",
+      "iconColour": "#DC3545"
+    }
+  }
+}

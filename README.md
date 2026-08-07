@@ -1,99 +1,104 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 🛒 Inventory Management System (IMS) — Anaya Market
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+<img width="1380" height="662" alt="Anay log" src="https://github.com/user-attachments/assets/ab66dfb1-9d77-4fb0-876b-529164ca604e" />
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+> **The Single Source of Truth for Enterprise Product Data, Multi-Branch Stock Visibility, Automated Procurement, and Logistics Reconciliation.**
 
-## Description
+---
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 📌 Executive Summary
 
-## Project setup
+The **Inventory Management System (IMS)** serves as the central operational engine for **Anaya Market**. It governs end-to-end supply chain execution—from initial product master data registration and supplier procurement to main warehouse receiving, batch expiry tracking, branch logistics, and real-time checkout inventory deduction.
 
-```bash
-$ npm install
+By integrating machine-to-machine APIs with physical POS terminals and E-Commerce platforms, IMS eliminates stock discrepancies, prevents out-of-stock scenarios via automated reorder points, and guarantees full batch traceability across all retail channels.
+
+---
+
+## 🎯 Core Capabilities & Key Functions
+
+- 🏷️ **Master Data Management**: Centralized registration of products, category trees, retail pricing, supplier profiles, and unique **Stock Keeping Unit (SKU)** / barcode generation.
+- 📦 **Real-Time Multi-Location Tracking**: Complete visibility into inventory balances across the primary distribution center and all retail branch stores.
+- ⚡ **Automated Procurement Engine**: Dynamic generation of Purchase Orders (POs) when stock thresholds drop below predefined safety/reorder points.
+- 🚚 **Logistics & Reconciliation**: Inter-branch transfer requests, goods shipment tracking, and discrepancy reconciliation.
+- 🛡️ **Quality Control & Expiry Management**: Batch-level tracking to monitor perishables, manage First-Expiry, First-Out (FEFO) picking, and log shrinkage/disposals.
+- 🤖 **Omnichannel Machine Service API**: High-speed REST APIs enabling POS registers and E-Commerce microservices to lock, query, and deduct stock synchronously.
+
+---
+
+## 👥 Roles & Authorization Hierarchy
+
+IMS implements a fine-grained Role-Based Access Control (RBAC) architecture with five primary system personas:
+
+| Icon | Role                      | Key Function & Scope                                                                                    | Target Persona                      |
+| :--: | :------------------------ | :------------------------------------------------------------------------------------------------------ | :---------------------------------- |
+|  👑  | **`super_admin`**         | Full platform control, infrastructure override, database management, and complete audit log review.     | System Owner / Lead Engineer        |
+|  👔  | **`admin`**               | Operational management under owner, staff onboarding, permission assignment, and management reporting.  | Project Lead / Assistant Manager    |
+|  🏷️  | **`procurement_manager`** | Master catalog control, pricing structures, supplier management, and PO lifecycle management.           | Purchasing Officer                  |
+|  📦  | **`inventory_staff`**     | On-ground Goods Received Note (GRN) entry, physical stock counts, expiry checks, and shrinkage logging. | Warehouse Staff / Store Clerk       |
+|  🤖  | **`system_service`**      | Non-human machine-to-machine API key authentication for POS and E-Commerce synchronization.             | Automated POS & E-COM Microservices |
+
+## 🛡️ Authentication & Access Control Architecture
+
+The system utilizes a hybrid **Role-Based Access Control (RBAC) & Dynamic Permission Override System** implemented using NestJS Guards and Decorators:
+
+```text
+                            ┌───────────────────────────┐
+                            │    Incoming Request       │
+                            └─────────────┬─────────────┘
+                                          │
+                                   [ JwtAuthGuard ] ──► Token Valid? ──► (No: 401 Unauthorized)
+                                          │
+                                          ▼
+                                   [ RolesGuard ]   ──► Role Allowed? ──► (No: 403 Forbidden)
+                                          │
+                                          ▼
+                                   [ PermissionsGuard ]
+                                          │
+                  ┌───────────────────────┼────────────────────────┐
+                  │                       │                        │
+            (Is super_admin?)  (Has Required Role?)  (Has Explicit Custom Permission?)
+                  │                       │                        │
+                  ▼                       ▼                        ▼
+            ALLOW                  ALLOW                    ALLOW
+
+
 ```
 
-## Compile and run the project
+## 🏗️ Architecture & Directory Blueprint
 
-```bash
-# development
-$ npm run start
+The project is built with NestJS, adhering to a clean domain-driven layout:
 
-# watch mode
-$ npm run start:dev
+      src/
+      ├── commons/                  # Cross-cutting assets (grouped by domain)
+      │   ├── dtos/                 # Request/Response payloads with Swagger specs
+      │   ├── enums/                # System enums (Roles, Statuses)
+      │   ├── interfaces/           # Module contracts & typings
+      │   └── schema/               # Database ORM entities & schema definitions
+      ├── database/                 # Core DB connection & setup logic
+      └── modules/                  # Application domain modules
+          ├── app/                  # Application root configuration
+          ├── auth/                 # JWT Auth, 2FA, session lifecycle
+          └── user/                 # User management & onboarding workflow
 
-# production mode
-$ npm run start:prod
-```
+## 🐳 Docker Infrastructure & Environment Services
 
-## Run tests
+The system runs on a containerized infrastructure orchestrating MongoDB, Mongo Express (UI), and the NestJS API application:
 
-```bash
-# unit tests
-$ npm run test
+🚀 Getting Started with Docker
 
-# e2e tests
-$ npm run test:e2e
+### 1. Clone the Repository
 
-# test coverage
-$ npm run test:cov
-```
+      git clone [https://github.com/norhantarek1520/Inventory-Management-System-Anaya-System.git](https://github.com/norhantarek1520/Inventory-Management-System-Anaya-System.git)
+      cd "Inventory-Management-System-Anaya-System"
 
-## Deployment
+### 2. Start the Application Environment
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+Run Docker Compose to spin up MongoDB, Mongo Express, and the API container:
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+     docker compose up -d --build
 
-```bash
-$ npm install -g mau
-$ mau deploy
-```
+### 3. Verify Container Status
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Check if all three services are running:
 
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+    docker compose ps
