@@ -59,4 +59,12 @@ export class CategoryController {
     return await this.categoryService.remove(id);
   }
   //==============================================================================================
+  @Patch(':id/toggle-status')
+  @ApiOperation({ summary: 'Update a Category Status by ID' })
+  @ApiParam({ name: 'id', description: 'Category ObjectId' })
+  @ApiResponse({ status: 200, description: 'The Category status has been successfully updated.' })
+  @ApiResponse({ status: 404, description: 'Category not found.' })
+  async togleStatus(@Param('id', ParseObjectIdPipe) id: string) {
+    return await this.categoryService.togleStatus(id);
+  }
 }
