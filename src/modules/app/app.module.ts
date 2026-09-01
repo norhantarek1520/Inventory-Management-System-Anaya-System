@@ -11,6 +11,7 @@ import { SeedersModule } from '../../database/seeders/seeders.module';
 import { CategoryModule } from '../category/category.module';
 import { SubCategoryModule } from '../sub_category/sub_category.module';
 import { ProductModule } from '../product/product.module';
+import { ProductItemModule } from '../product_item/product_item.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { ProductModule } from '../product/product.module';
     CategoryModule,
     SubCategoryModule,
     ProductModule,
+    ProductItemModule,
   ],
   controllers: [AppController],
   providers: [
