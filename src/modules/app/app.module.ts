@@ -8,6 +8,10 @@ import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard, JwtAuthGuard, PermissionsGuard } from 'src/commons';
 import { AuthModule } from '../auth/auth.module';
 import { SeedersModule } from '../../database/seeders/seeders.module';
+import { CategoryModule } from '../category/category.module';
+import { SubCategoryModule } from '../sub_category/sub_category.module';
+import { ProductModule } from '../product/product.module';
+import { ProductItemModule } from '../product_item/product_item.module';
 
 @Module({
   imports: [
@@ -19,6 +23,10 @@ import { SeedersModule } from '../../database/seeders/seeders.module';
     UserModule,
     AuthModule,
     SeedersModule, //it initializes on every boot.
+    CategoryModule,
+    SubCategoryModule,
+    ProductModule,
+    ProductItemModule,
   ],
   controllers: [AppController],
   providers: [
