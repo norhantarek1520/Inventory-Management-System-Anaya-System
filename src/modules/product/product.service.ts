@@ -1,10 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-  ConflictException,
-  ForbiddenException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ConflictException, ForbiddenException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Product, ProductDocument } from 'src/commons/schema';
@@ -34,9 +28,7 @@ export class ProductService {
     // 2. Validate secondary sub-category (if provided)
     if (createProductDto.secondary_subcategory_id) {
       if (createProductDto.secondary_subcategory_id === createProductDto.primary_subcategory_id) {
-        throw new BadRequestException(
-          'secondary_subcategory_id must be different from primary_subcategory_id',
-        );
+        throw new BadRequestException('secondary_subcategory_id must be different from primary_subcategory_id');
       }
       await this.validateSubCategory(createProductDto.secondary_subcategory_id, 'secondary_subcategory_id');
     }
@@ -49,12 +41,7 @@ export class ProductService {
 
       return await product.save();
     } catch (error) {
-      if (error?.code === 11000) {
-        throw new ConflictException(
-          `A product with code "${createProductDto.product_code}" already exists.`,
-        );
-      }
-      throw error;
+      throw new ConflictException(`A product with code "${createProductDto.product_code}" already exists.`);
     }
   }
 
@@ -92,10 +79,7 @@ export class ProductService {
       }
 
       if (query.search) {
-        filter.$or = [
-          { name: { $regex: query.search, $options: 'i' } },
-          { product_code: { $regex: query.search, $options: 'i' } },
-        ];
+        filter.$or = [{ name: { $regex: query.search, $options: 'i' } }, { product_code: { $regex: query.search, $options: 'i' } }];
       }
     }
 
@@ -155,13 +139,10 @@ export class ProductService {
       // Guard against making both sub-categories the same during an update
       const primaryId =
         updateProductDto.primary_subcategory_id ??
-        (await this.productModel.findById(id).select('primary_subcategory_id').lean().exec())
-          ?.primary_subcategory_id?.toString();
+        (await this.productModel.findById(id).select('primary_subcategory_id').lean().exec())?.primary_subcategory_id?.toString();
 
       if (updateProductDto.secondary_subcategory_id === primaryId) {
-        throw new BadRequestException(
-          'secondary_subcategory_id must be different from primary_subcategory_id',
-        );
+        throw new BadRequestException('secondary_subcategory_id must be different from primary_subcategory_id');
       }
 
       await this.validateSubCategory(updateProductDto.secondary_subcategory_id, 'secondary_subcategory_id');
@@ -181,9 +162,8 @@ export class ProductService {
 
       return updated;
     } catch (error) {
-      if (error?.code === 11000) {
-        throw new ConflictException('Product code already in use by another product.');
-      }
+      throw new ConflictException('Product code already in use by another product.');
+
       throw error;
     }
   }
@@ -241,9 +221,7 @@ export class ProductService {
       throw new NotFoundException(`SubCategory with ID "${subcategoryId}" (${fieldName}) not found`);
     }
     if (!subCategory.is_active) {
-      throw new ForbiddenException(
-        `SubCategory "${subCategory.name}" is currently inactive and cannot be assigned to a product`,
-      );
+      throw new ForbiddenException(`SubCategory "${subCategory.name}" is currently inactive and cannot be assigned to a product`);
     }
   }
 }

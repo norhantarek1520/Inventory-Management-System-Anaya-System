@@ -1,18 +1,9 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-  ConflictException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { ProductItem, ProductItemDocument } from 'src/commons/schema';
 import { Product, ProductDocument } from 'src/commons/schema';
-import {
-  CreateProductItemDto,
-  UpdateProductItemDto,
-  GetProductItemQueryDto,
-} from 'src/commons';
+import { CreateProductItemDto, UpdateProductItemDto, GetProductItemQueryDto } from 'src/commons';
 
 @Injectable()
 export class ProductItemService {
@@ -41,10 +32,7 @@ export class ProductItemService {
       });
       return await item.save();
     } catch (error) {
-      if (error?.code === 11000) {
-        throw new ConflictException(`A product item with SKU "${dto.sku}" already exists.`);
-      }
-      throw error;
+      throw new ConflictException(`A product item with SKU "${dto.sku}" already exists.`);
     }
   }
 
@@ -157,9 +145,8 @@ export class ProductItemService {
 
       return updated;
     } catch (error) {
-      if (error?.code === 11000) {
-        throw new ConflictException('SKU already in use by another product item.');
-      }
+      throw new ConflictException('SKU already in use by another product item.');
+
       throw error;
     }
   }
@@ -216,10 +203,7 @@ export class ProductItemService {
       throw new NotFoundException(`Parent product with ID "${productId}" not found`);
     }
     if (!product.is_active) {
-      throw new BadRequestException(
-        `Parent product "${product.name}" is currently inactive. ` +
-          `Activate it before adding variants.`,
-      );
+      throw new BadRequestException(`Parent product "${product.name}" is currently inactive. ` + `Activate it before adding variants.`);
     }
   }
 }
