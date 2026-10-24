@@ -1,7 +1,9 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsBoolean, IsEnum, IsInt, IsOptional, IsString, Min } from 'class-validator';
-import { Role } from 'src/commons';
+// Direct path, not the 'src/commons' barrel — see the note in commons/schema/user.schema.ts
+// about the circular import that causes.
+import { Role } from '../../enums';
 
 export class GetUserQueryDto {
   @ApiPropertyOptional({

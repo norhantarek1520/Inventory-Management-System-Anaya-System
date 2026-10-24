@@ -19,6 +19,10 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     Permission.USERS_DELETE,
     Permission.TASKS_REVIEW,
     Permission.REPORTS_READ,
+    // Admins can read the audit trail. Note that no role is granted any WRITE capability over
+    // it — the trail is append-only and is written exclusively by AuditInterceptor and
+    // explicit service calls, never through an HTTP endpoint.
+    Permission.AUDIT_READ,
   ],
 
   [Role.PROCUREMENT_MANAGER]: [

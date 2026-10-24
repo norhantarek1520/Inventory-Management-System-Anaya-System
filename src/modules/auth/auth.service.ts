@@ -4,6 +4,7 @@ import {
   HttpException,
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -17,6 +18,8 @@ import { getEffectivePermissions } from 'src/commons/constants';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly jwtService: JwtService,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
@@ -156,7 +159,10 @@ export class AuthService {
       const payload = await this.jwtService.verifyAsync(refreshTokenDto.refreshToken, {
         secret: process.env.JWT_REFRESH_SECRET || 'superSecretRefreshKey',
       });
-      console.log('Refresh token payload:', payload);
+      // Only the subject id - NEVER the whole payload. A decoded JWT payload is
+      // credential-adjacent material (it carries the role and permission claims), and the
+      // golden rule is that no credential or token content reaches a log (docs section 1.6).
+      this.logger.debug(`Refresh token verified for userId=${payload?.sub}`);
 
       // 2. Fetch user with stored hashed refresh token
       const user = await this.userModel.findById(payload.sub).select('+refreshTokenHash').exec();

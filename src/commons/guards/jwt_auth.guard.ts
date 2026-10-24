@@ -1,4 +1,4 @@
-import { Injectable, ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import { Injectable, ExecutionContext, Logger, UnauthorizedException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from '../decorators';
@@ -10,6 +10,8 @@ import { IS_PUBLIC_KEY } from '../decorators';
  */
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
+  private readonly logger = new Logger(JwtAuthGuard.name);
+
   constructor(private readonly reflector: Reflector) {
     super();
   }
@@ -25,7 +27,13 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
   handleRequest(err: any, user: any, info: any) {
     if (info) {
-      console.log('🔴 JWT Guard Error Info:', info.message || info);
+      // `warn`, not `error`: an expired or malformed token is the CALLER's problem, not a
+      // server fault. Logging it as an error would fill the error channel with normal traffic
+      // until nobody trusts it (see AllExceptionsFilter for the same reasoning).
+      //
+      // Only `info.message` is logged - never `info` wholesale and never the raw token, which
+      // is a live credential (docs section 1.6).
+      this.logger.warn(`JWT rejected: ${info.message ?? 'invalid token'}`);
     }
     if (err || !user) {
       throw err || new UnauthorizedException('Access denied. Valid JWT token required.');

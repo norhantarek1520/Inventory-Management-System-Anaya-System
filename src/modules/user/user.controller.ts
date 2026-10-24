@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Patch, Delete, Query, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, Delete, Query, HttpCode, HttpStatus, Logger, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto, GetUserQueryDto, UpdateUserDto } from 'src/commons/dtos';
 import { ParseObjectIdPipe } from 'node_modules/@nestjs/mongoose/dist';
@@ -9,6 +9,9 @@ import { Role, Roles, Permissions, Permission } from 'src/commons';
 @Controller('user')
 //@UseGuards(RolesGuard) // 👈 Order matters auth guard should run first
 export class UserController {
+  // Named after the class so the log's context column tells you exactly who spoke.
+  private readonly logger = new Logger(UserController.name);
+
   constructor(private readonly userService: UserService) {}
   //==================================================================================================
 
@@ -23,7 +26,7 @@ export class UserController {
   @ApiResponse({ status: 400, description: 'Validation error in request body.' })
   @ApiResponse({ status: 409, description: 'Username, email, or phone number already in use.' })
   createUser(@Body() dto: CreateUserDto) {
-    console.log('✨Received request to create user');
+    this.logger.log('Create-user request received');
     return this.userService.createUser(dto);
   }
   //==================================================================================================
@@ -40,7 +43,7 @@ export class UserController {
     description: 'Successfully retrieved list of users and pagination metrics.',
   })
   getAllUsers(@Query() dto?: GetUserQueryDto) {
-    console.log('✨Fetching all users from controller...');
+    this.logger.verbose('List-users request received');
     return this.userService.getAllUsers(dto);
   }
   //==================================================================================================
@@ -61,7 +64,7 @@ export class UserController {
   @ApiResponse({ status: 400, description: 'Invalid Mongo ID format provided.' })
   @ApiResponse({ status: 404, description: 'User not found.' })
   getUserById(@Param('id', ParseObjectIdPipe) id: string) {
-    console.log('✨Fetching one user from controller...');
+    this.logger.verbose('Get-user request received');
     return this.userService.getUserById(id);
   }
   //==================================================================================================
@@ -86,7 +89,7 @@ export class UserController {
     description: 'Updated email or phone is already taken by another user.',
   })
   updateUser(@Param('id', ParseObjectIdPipe) id: string, @Body() dto: UpdateUserDto) {
-    console.log('Update one user from controller...');
+    this.logger.log('Update-user request received');
 
     return this.userService.updateUser(id, dto);
   }
@@ -108,7 +111,7 @@ export class UserController {
   @ApiResponse({ status: 400, description: 'Invalid Mongo ID format provided.' })
   @ApiResponse({ status: 404, description: 'User not found.' })
   deleteUser(@Param('id', ParseObjectIdPipe) id: string) {
-    console.log('Delete one user from controller...');
+    this.logger.warn('Delete-user request received');
 
     return this.userService.deleteUser(id);
   }
@@ -123,7 +126,7 @@ export class UserController {
   })
   @ApiResponse({ status: 204, description: 'Database cleared successfully.' })
   resetAllUser() {
-    console.log('Reset all users from controller...');
+    this.logger.warn('Reset-all-users request received - destructive operation');
 
     return this.userService.resetAllUser();
   }

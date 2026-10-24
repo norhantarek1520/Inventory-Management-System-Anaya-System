@@ -1,7 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsArray, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsPhoneNumber, IsString, MinLength } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { Permission, Role } from 'src/commons';
+// Direct path, not the 'src/commons' barrel — see the note in commons/schema/user.schema.ts
+// about the circular import that causes.
+import { Permission, Role } from '../../enums';
 
 export class CreateUserDto {
   @ApiProperty({

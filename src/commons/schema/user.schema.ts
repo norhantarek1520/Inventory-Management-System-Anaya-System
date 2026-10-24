@@ -1,6 +1,12 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { Role } from 'src/commons';
+// Imported from '../enums' rather than the 'src/commons' barrel ON PURPOSE.
+// A file INSIDE commons importing the commons barrel is self-referential: it makes
+// commons/index load schema/index, which loads this file, which loads commons/index again.
+// Under CommonJS the second entry returns a half-initialised module, so `User` was still
+// undefined when product.schema read `User.name` — crashing the app at boot. Modules inside
+// commons must always import their siblings by direct path.
+import { Role } from '../enums';
 
 export type UserDocument = User & Document;
 

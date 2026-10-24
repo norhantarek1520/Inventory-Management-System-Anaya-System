@@ -29,6 +29,13 @@ export enum Permission {
   // --- Task & Audit Review ---
   TASKS_REVIEW = 'tasks:review',
 
+  // --- Audit Trail ---
+  // Gates the read-only GET /audit-log endpoints. Kept separate from TASKS_REVIEW because the
+  // audit trail exposes who did what, when, and from which IP across the WHOLE system — a
+  // strictly more sensitive capability than reviewing tasks, and one that should be grantable
+  // (and revocable) on its own.
+  AUDIT_READ = 'audit:read',
+
   // --- Reports ---
   REPORTS_READ = 'reports:read',
 

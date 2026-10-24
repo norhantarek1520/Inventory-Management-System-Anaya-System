@@ -2,18 +2,20 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from 'src/commons/schema/user.schema';
 import { CreateUserDto, GetUserQueryDto, UpdateUserDto } from 'src/commons/dtos';
-import { BadRequestException, ConflictException, HttpException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, HttpException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 
 import * as bcrypt from 'bcryptjs';
 @Injectable()
 export class UserService {
+  private readonly logger = new Logger(UserService.name);
+
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   /**
    * Creates a new user record in the database
    */
   public async createUser(createUserDto: CreateUserDto): Promise<{ userObject: Partial<User>; tempPassword: string }> {
-    console.log('⚡Creating user ');
+    this.logger.debug('Step 1: Creating user - validating uniqueness');
     // 1. Check for unique constraints beforehand (Email & Username)
     await this.isUserExist(createUserDto);
     // 2. Generate unique user code
@@ -27,7 +29,7 @@ export class UserService {
 
     try {
       // 5. Create user instance
-      console.log('starting to create new user instance...');
+      this.logger.debug('Step 5: Instantiating user document');
       const newUser = new this.userModel({
         ...createUserDto,
         userCode,
@@ -184,15 +186,16 @@ export class UserService {
 
     if (existingUser) {
       if (existingUser.username === userData.username) {
-        console.log('Username already exists:', userData.username);
+        // `warn`: a duplicate is a caller mistake, not a server fault.
+        this.logger.warn(`Duplicate username rejected: ${userData.username}`);
         throw new ConflictException('Username is already in use.');
       }
       if (existingUser.email === userData.email) {
-        console.log('Email already exists:', userData.email);
+        this.logger.warn(`Duplicate email rejected: ${userData.email}`);
         throw new ConflictException('Email address is already in use.');
       }
       if (existingUser.phone === userData.phone) {
-        console.log('Phone number already exists:', userData.phone);
+        this.logger.warn(`Duplicate phone rejected: ${userData.phone}`);
         throw new ConflictException('Phone number address is already in use.');
       }
     }
@@ -224,7 +227,7 @@ export class UserService {
    * Generates a unique user code in the format EMP-XXXX (e.g., EMP-4829)
    */
   private async generateUserCode(): Promise<string> {
-    console.log('Generating unique user code...');
+    this.logger.verbose('Generating unique user code');
     let userCode: string;
     let isUnique = false;
 
@@ -254,7 +257,9 @@ export class UserService {
    * Hashes plain text passwords using bcrypt
    */
   private async hashPassword(password: string): Promise<string> {
-    console.log('Hashing password...');
+    // Note what is NOT here: the password itself, hashed or plain. Logging a bcrypt hash
+    // is still logging a credential - it is offline-crackable (docs section 1.6).
+    this.logger.verbose('Hashing password');
     const saltRounds = 10;
     return bcrypt.hash(password, saltRounds);
   }
@@ -275,7 +280,18 @@ export class UserService {
     //     tempPassword: tempPassword,
     //   },
     // });
-    console.log(`[ONBOARDING EMAIL] Sent to ${user.email} with temp password: ${tempPassword}`);
+    // SECURITY FIX: this line used to print the temporary password in plaintext.
+    //
+    // That is the single worst thing you can put in a log. Logs are plaintext files, often
+    // shipped to a third-party platform, and readable by far more people than the database
+    // is - so a password there is effectively a published credential, and it stays published
+    // in backups and search indexes long after you notice (docs section 1.6).
+    //
+    // The recipient is logged because that is the operationally useful fact. The credential
+    // is not, and `tempPassword` is referenced only to keep the parameter honest for the
+    // real mailer integration that replaces this stub.
+    void tempPassword;
+    this.logger.log(`[ONBOARDING EMAIL] Queued for ${user.email} (credential intentionally not logged)`);
   }
 
   /**

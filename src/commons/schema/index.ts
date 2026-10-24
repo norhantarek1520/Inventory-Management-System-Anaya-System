@@ -3,4 +3,4 @@ export * from './category.schema';
 export * from './subcategory.schema';
 export * from './product.schema';
 export * from './product_item.schema';
-
+export * from './audit_log.schema';

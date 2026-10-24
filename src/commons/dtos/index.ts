@@ -4,3 +4,4 @@ export * from './category';
 export * from './subcategory';
 export * from './product';
 export * from './product_item';
+export * from './audit_log';
